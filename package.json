@@ -1,0 +1,25 @@
+{
+  "name": "test_langsup",
+  "version": "1.0.0",
+  "description": "Yolo buddy.",
+  "author": "Bruce Banner",
+  "homepage": "http://BruceBanner@homepage.com",
+  "private": true,
+  "devDependencies": {
+    "body-parser": "^1.0.0",
+    "cookie-parser": "^1.0.0",
+    "express": "^3.0.0",
+    "express-session": "^1.0.0",
+    "cookie-session": "^1.0.0",
+    "passport": "^0.3.0",
+    "passport-local": "^1.0.0",
+    "serve-static": "^1.0.0",
+    "ejs": "^2.0.0",
+    "html": "^1.0.0",
+    "sqlite3": "^3.0.0",
+    "twig" : "^0.10.0",
+    "connect" : "^3.0.0",
+    "connect-sqlite3" : "^0.9.0"
+  },
+  "dependencies": {}
+}

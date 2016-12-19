@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7, IE=edge"/>
+    <meta content="width=1000" name="viewport"/>
+    {% block head %}
+        <title>{% block title %}{{ title }}{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="/css/common.css"/>
+        {#<link rel="stylesheet" type="text/css" href="/css/ui.css"/>#}
+        <link rel="stylesheet" type="text/css" href="/css/base.css"/>
+        <link rel="stylesheet" type="text/css" href="/css/lite.css"/>
+        <link rel="stylesheet" type="text/css" href="/vx/css/vx.min.css"/>
+        {#<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css"/>#}
+        {#<link rel="stylesheet" type="text/css" href="/css/font-awesome-animation.min.css"/>#}
+        <script type="text/javascript" src="/vx/js/vx.min.js"></script>
+        <script type="text/javascript" src="/js/EventEmitter.js"></script>
+        <link rel="shortcut icon" href="/images/favicon.png?">
+        {#<script type="text/javascript" src="/js/common.js"></script>#}
+        {#<script type="text/javascript" src="/js/ui.js"></script>#}
+        {#<script type="text/javascript" src="/js/menu.class.js"></script>#}
+        {#<script type="text/javascript" src="/js/main.js"></script>#}
+
+        {% for item in loaded_lang %}
+        <script type="text/javascript" src="{{ item }}"></script>
+        {% endfor %}
+
+    {% endblock %}
+</head>
+<body class="">
+<div class="content">
+    <div class="wrap">{% block content %}{% endblock %}</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7, IE=edge"/>
+    <meta content="width=1000" name="viewport"/>
+    {% block head %}<title>{% block title %}{{ title|striptags|raw }}{% endblock %}</title>
+        <link rel="shortcut icon" href="/images/favicon.png"/>
+        <link rel="stylesheet" type="text/css" href="/css/common.css"/>
+        <link rel="stylesheet" type="text/css" href="/css/base.css"/>
+        <link rel="stylesheet" type="text/css" href="/vx/css/vx.min.css"/>
+        <script type="text/javascript" src="/vx/js/vx.min.js"></script>
+        <script type="text/javascript" src="/js/EventEmitter.js"></script>
+        <script type="text/javascript">
+            var __data = {{ __data|json_encode(constant('JSON_UNESCAPED_UNICODE'))|raw }};
+            var error = {{ error|json_encode(constant('JSON_UNESCAPED_UNICODE'))|raw }};
+            var error_message = {{ message|json_encode(constant('JSON_UNESCAPED_UNICODE'))|raw }};
+        </script>
+    {% endblock %}
+</head>
+<body class="header_fixed left_menu_fixed right_menu_fixed {% block body_id %}{% endblock %}">
+<div class="header">
+    <div class="wrap cf">
+        <a class="fl logo" href="/"></a>
+    </div>
+</div>
+<div class="page_wrap wrap cf">
+    {% block content %}{% endblock %}
+</div>
+<div class="footer">
+    <br/>
+</div>
+</body>
+</html>

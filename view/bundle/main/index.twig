@@ -1,0 +1,392 @@
+{% extends "base.twig" %}
+
+{#{% block body_id 'left_show' %}#}
+
+{#<div class="center">#}
+    {#<div class="content_wrap">#}
+        {#<div class="title_wrap cf" id="content-title-wrap">{{ h1|raw }}</div>#}
+        {#<div class="content" id="content">#}
+            {#<div id="langs" class="big"></div>#}
+        {#</div>#}
+    {#</div>#}
+{#</div>#}
+
+{% block content %}
+
+    <div id="langs"></div>
+
+    <script type="text/javascript">
+
+
+        var ee = new EventEmitter();
+
+        function setContentTitle(title) {
+            ge('content-title-wrap').innerHTML = title;
+        }
+
+
+        createClass('Langs', {
+
+            init: function (obj) {
+                if (!obj) return false;
+                this.node = ge(obj);
+
+                this.guid = _ui.reg(this);
+                var self = this;
+
+
+                ee.addListener('create-db-page', this.installPage);
+                ee.addListener('langs-page', this.langsPage);
+
+                self.checkDB(function () {
+                    ee.emitEvent('langs-page', [self]);
+                });
+
+            },
+            addBundle: function(){
+//                var self = this;
+//                ee.emitEvent('langs-page', [self]);
+
+
+                var self = this;
+
+                if (!this.add_bundle_box) this.add_bundle_box = new MessageBox({
+                    type: 'MessageBox',
+                    title: 'Новый бандл',
+                    width: 620,
+                    fullPageLink: '',
+                    closeButton: true,
+                    dark: true
+                });
+                var box = this.add_bundle_box,
+                        save = function(){
+
+                            var data = {
+                                'name': trim(ge('add_bundle_name').value),
+                                'description': trim(ge('add_bundle_description').value)
+                            };
+
+                            ajax.post('/index/bundle/add', data, function (t) {
+
+                                if (t.error == true) {
+                                    showMessage(getLang(t.message), MESSAGE_ERROR);
+                                    return false;
+                                }
+
+                                box.hide();
+                                showMessage(getLang("bundle-add-success"), MESSAGE_SUCCESS);
+                                ee.emitEvent('langs-page', [self]);
+                            });
+                        };
+
+                box.removeButtons();
+
+                box.addButton({
+                    label: 'Закрыть',
+                    style: 'button_no',
+                    onClick: function () {
+                        box.hide();
+                    }
+                });
+                box.addButton({
+                    label: 'Добавить',
+                    onClick: function () {
+                        save();
+                    }
+                });
+
+                var html = '<div class="big">';
+                html += '<div class="cf"><div class="label">Имя:</div><div class="labeled"><input type="text" id="add_bundle_name"  value="" /></div></div>';
+                html += '<div class="cf"><div class="label">Описание:</div><div class="labeled"><input type="text" id="add_bundle_description"  value="" /></div></div>';
+                html += '</div>';
+
+                box.content(html);
+                box.show();
+                return false;
+            },
+            langsPage: function (self) {
+                self.node.innerHTML = '<div class="center">' +
+                        '<div class="content_wrap">' +
+                        '<div class="title_wrap cf" id="content-title-wrap">' +
+                        '<div class="fl" id="bundle_name">LangsUP</div>' +
+                        '<button class="fl flat_button secondary" style="margin: 14px 0 0 10px" onclick="_ui._uids[' + self.guid + '].addBundle()">Новый бандл</button>' +
+                        '<div class="fr" style="margin-top: 14px"><div onclick="_ui._uids[' + self.guid + '].generate()" class="flat_button ">' + getLang('langs-generate') + '</div></div>' +
+                        '<div class="fr" style="margin-right: 20px; margin-top: 12px; line-height: normal"><input type="text" id="projects_list_' + self.guid + '" name="projects_list_' + self.guid + '" value="' + (cookies.get('lang_use_project') ? cookies.get('lang_use_project') : 0) + '" /></div>' +
+                        '</div>' +
+                        '<div class="content" id="content">' +
+                        '<div id="langs" class="big">' +
+                        '<div class="langs_list">' +
+                        '<div class="langs_list_table">' +
+                        '<table class="main no_border">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<td width="30%">' + getLang('global-key') + '</td>' +
+                        '<td width="70%">' + getLang('global-value') + '</td>' +
+                        '<td width="32"></td>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>' +
+                        '</tbody>' +
+                        '</table>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                self.langs_list_table = geByClass1('langs_list_table', this.self);
+                self.table_tbody = self.langs_list_table.getElementsByTagName('tbody')[0];
+
+                ajax.post('/index/bundles/get', {}, function (t) {
+
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    var list = t.bundles;
+                    list.unshift([0, getLang('langs-section-is-not-set')]);
+
+                    if(t.bundles.map(function(el){return el[0]}).indexOf(1) == '-1') {
+                        ge('projects_list_' + self.guid).value = 0;
+                        cookies.set('lang_use_project', 0, 365)
+                    }
+
+                    new Dropdown(ge('projects_list_' + self.guid), list, {
+                                width: 160,
+                                big: true,
+                                defaultValue: '123',
+                                onChange: function (v) {
+                                    self.show_langs_table(v);
+                                    cookies.set('lang_use_project', v, 365);
+                                }
+                            }
+                    );
+
+                    if (cookies.get('lang_use_project')) {
+                        self.show_langs_table(cookies.get('lang_use_project'));
+                    }
+
+                });
+
+
+            },
+            installDB: function () {
+                var self = this;
+                ajax.post('/index/install/db', {}, function (t) {
+
+                    if (t.error == true) {
+                        getLang(t.message, MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    ee.emitEvent('langs-page', [self]);
+
+                });
+            },
+            installPage: function (self) {
+                self.node.innerHTML = '<div class="center">' +
+                        '<div class="content_wrap">' +
+                        '<div class="content big ac" id="content">' +
+                        '<span style="font-size: 18px">База данных еще не установлена</span><br /><br />' +
+                        '<button class="flat_button" onclick="_ui._uids[' + self.guid + '].installDB()">Установить новую базу данных</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+            },
+            checkDB: function (callback) {
+                var self = this;
+                ajax.post('/index/check/db', {}, function (t) {
+
+                    if (t.error == true) {
+
+                        if (t.message == 'database-file-is-not-found') {
+                            ee.emitEvent('create-db-page', [self]);
+                            return false;
+                        }
+
+                        getLang(t.message, MESSAGE_ERROR);
+                        return false;
+                    }
+                    if (isFunction(callback)) callback();
+
+                });
+            },
+            setField: function (id, key, value, no_tr) {
+                no_tr = !!(no_tr);
+                return (no_tr ? '' : '<tr id="lang_field_' + id + '">') +
+                        '<td><input onblur="_ui._uids[' + this.guid + '].updateKey(this, ' + id + ')" style="box-sizing: border-box; width: 100%" type="text" value="' + key + '" /></td>' +
+                        '<td><input onblur="_ui._uids[' + this.guid + '].updateValue(this, ' + id + ')" style="box-sizing: border-box; width: 100%" type="text" value="' + value + '" /></td>' +
+                        '<td><div onclick="_ui._uids[' + this.guid + '].deleteKey(' + id + ')" class="delete_light_button"></div></td>' +
+                        (no_tr ? '' : '</tr>');
+            },
+            show_langs_table: function (project_id) {
+                var self = this;
+                this.get_langs(project_id, function (data) {
+                    var d = data.langs,
+                            html = '';
+
+                    html += '' +
+                            '<tr>' +
+                            '<td><input id="langs_new_key" placeholder="Новый ключ" onkeydown="onCtrlEnter(event, function(){_ui._uids[' + self.guid + '].addKeyValue();});" style="box-sizing: border-box; width: 100%" type="text" value="" /></td>' +
+                            '<td><input id="langs_new_value" placeholder="' + getLang('global-value') + '" onkeydown="onCtrlEnter(event, function(){_ui._uids[' + self.guid + '].addKeyValue();});" style="box-sizing: border-box; width: 100%" type="text" value="" /></td>' +
+                            '<td><div onclick="_ui._uids[' + self.guid + '].addKeyValue()" class="add_light_button"></div></td>' +
+                            '</tr>';
+
+                    for (var i = 0; i < d.length; i++) {
+                        html += self.setField(d[i]['id'], d[i]['key'], d[i]['value']);
+                    }
+
+                    self.table_tbody.innerHTML = html;
+                })
+            },
+            get_langs: function (project_id, callback) {
+
+
+                var self = this,
+                        data = {
+                            'project_id': project_id
+                        };
+
+                ajax.post('/index/langs/get', data, function (t) {
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        self.table_tbody.innerHTML = '<tr><td colspan="100" class="ac">' + getLang('global-chose-lang-section') + '</td></tr>';
+                        return false;
+                    }
+
+                    if (isFunction(callback)) callback(t);
+
+                });
+            },
+            updateKey: function (item, id) {
+
+                if (item.defaultValue == item.value) return;
+
+                var data = {
+                    id: id,
+                    key: trim(item.value)
+                };
+
+                ajax.post('/index/langs/set', data, function (t) {
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    item.defaultValue = item.value;
+
+                });
+            },
+            updateValue: function (item, id) {
+
+
+                if (item.defaultValue == item.value) return;
+
+                var data = {
+                    id: id,
+                    value: trim(item.value)
+                };
+
+                ajax.post('/index/langs/set', data, function (t) {
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    item.defaultValue = item.value;
+
+                });
+            },
+            deleteKey: function (id) {
+
+                var data = {
+                    id: id
+                };
+
+                ConfirmBox(getLang('langs-delete-key'), getLang('langs-delete-key-confirm'), function () {
+
+                    ajax.post('/index/langs/delete', data, function (t) {
+
+                        if (t.error == true) {
+                            showMessage(getLang(t.message), MESSAGE_ERROR);
+                            return false;
+                        }
+
+                        re(ge('lang_field_' + id));
+
+                    });
+                });
+            },
+            addKeyValue: function () {
+
+                if (ge('projects_list_' + this.guid).value == '0') {
+                    showMessage(getLang('langs-section-is-not-set'), MESSAGE_ERROR);
+                    return;
+                }
+
+                var data = {
+                    key: trim(ge('langs_new_key').value),
+                    value: trim(ge('langs_new_value').value),
+                    project_id: ge('projects_list_' + this.guid).value
+                }, self = this;
+
+                if (data.key == '') {
+                    return;
+                }
+
+                ajax.post('/index/langs/add', data, function (t) {
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    var field = ce('tr', {
+                        id: 'lang_field_' + t.id,
+                        innerHTML: self.setField(t.id, data.key, data.value)
+                    });
+                    self.table_tbody.insertBefore(field, self.table_tbody.getElementsByTagName('tr')[1]);
+
+                    ge('langs_new_key').value = '';
+                    ge('langs_new_value').value = '';
+
+                });
+            },
+            generate: function () {
+
+                if (ge('projects_list_' + this.guid).value == '0') {
+                    showMessage(getLang('langs-section-is-not-set'), MESSAGE_ERROR);
+                    return;
+                }
+
+                ajax.post('/index/langs/generate', {project_id: trim(ge('projects_list_' + this.guid).value)}, function (t) {
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    showMessage(getLang("langs-generate-success"), MESSAGE_SUCCESS);
+
+
+                });
+            }
+
+        });
+
+
+        onDomReady(function () {
+
+            new Langs('langs');
+
+        });
+
+
+    </script>
+{% endblock %}
