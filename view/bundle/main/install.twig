@@ -1,0 +1,76 @@
+{% extends "base.twig" %}
+
+{#{% block body_id 'left_show' %}#}
+
+{#<div class="center">#}
+    {#<div class="content_wrap">#}
+        {#<div class="title_wrap cf" id="content-title-wrap">{{ h1|raw }}</div>#}
+        {#<div class="content" id="content">#}
+            {#<div id="langs" class="big"></div>#}
+        {#</div>#}
+    {#</div>#}
+{#</div>#}
+
+{% block content %}
+
+    <div id="install"></div>
+
+    <script type="text/javascript">
+
+
+        var ee = new EventEmitter();
+
+        function setContentTitle(title) {
+            ge('content-title-wrap').innerHTML = title;
+        }
+
+
+        createClass('Install', {
+
+            init: function (obj) {
+                if (!obj) return false;
+                this.node = ge(obj);
+
+                this.guid = _ui.reg(this);
+                var self = this;
+
+                ee.addListener('create-db-page', this.installPage);
+                ee.emitEvent('create-db-page', [self]);
+
+            },
+            installDB: function () {
+                var self = this;
+                ajax.post('/index/install/db', {}, function (t) {
+
+                    if (t.error == true) {
+                        getLang(t.message, MESSAGE_ERROR);
+                        return false;
+                    }
+
+                    window.location = "/";
+//                    ee.emitEvent('langs-page', [self]);
+
+                });
+            },
+            installPage: function (self) {
+                self.node.innerHTML = '<div class="center">' +
+                        '<div class="content_wrap">' +
+                        '<div class="content big ac" id="content">' +
+                        '<span style="font-size: 18px">База данных еще не установлена</span><br /><br />' +
+                        '<button class="flat_button" onclick="_ui._uids[' + self.guid + '].installDB()">Установить новую базу данных</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+            }
+        });
+
+
+        onDomReady(function () {
+
+            new Install('install');
+
+        });
+
+
+    </script>
+{% endblock %}

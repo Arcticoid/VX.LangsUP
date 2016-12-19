@@ -1,0 +1,214 @@
+{% extends "base.twig" %}
+
+{#{% block body_id 'left_show' %}#}
+
+{#<div class="center">#}
+    {#<div class="content_wrap">#}
+        {#<div class="title_wrap cf" id="content-title-wrap">{{ h1|raw }}</div>#}
+        {#<div class="content" id="content">#}
+            {#<div id="langs" class="big"></div>#}
+        {#</div>#}
+    {#</div>#}
+{#</div>#}
+
+{% block content %}
+
+    <div id="users"></div>
+
+    <script type="text/javascript">
+
+
+        var ee = new EventEmitter();
+
+        function setContentTitle(title) {
+            ge('content-title-wrap').innerHTML = title;
+        }
+
+
+        createClass('Users', {
+
+            init: function (obj) {
+                if (!obj) return false;
+                this.node = ge(obj);
+
+                this.guid = _ui.reg(this);
+                var self = this;
+
+                var html = '<div class="wrap cf">' +
+                        '<a class="fl logo" href="/"></a>'+
+                        '<a class="fl" href="/users">Пользователи</a>'+
+                        '<a class="fr logout tooltip tooltip-sw faa-parent animated-hover" data-label="Выход есть всегда!" href="/logout"><b>X</b></a>' +
+                        '</div>';
+
+                geByClass1('header').innerHTML = html;
+
+                ee.addListener('users-page', this.UsersPage);
+                ee.emitEvent('users-page', [self]);
+
+            },
+            UsersPage: function (self) {
+                self.node.innerHTML = '<div class="center">' +
+                        '<div class="content_wrap">' +
+                        '<div class="title_wrap cf" id="content-title-wrap">' +
+                        '<div class="fl" id="bundle_name">Пользователи</div>' +
+                        '<button class="fl flat_button secondary" style="margin: 14px 0 0 10px" onclick="_ui._uids[' + self.guid + '].addUser()">Добавить пользователя</button>' +
+                        '</div>' +
+                        '<div class="content" id="content">' +
+                        '<div id="users" class="big">' +
+                        '<div class="users_list">' +
+                        '<div class="users_list_table">' +
+                        '<table class="main no_border">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<td width="25%">' + getLang('Логин') + '</td>' +
+                        '<td width="38%">' + getLang('Имя') + '</td>' +
+                        '<td width="38%">' + getLang('Фамилия') + '</td>' +
+                        '<td width="32"></td>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>' +
+                        '</tbody>' +
+                        '</table>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+
+                self.users_list_table = geByClass1('users_list_table', this.self);
+                self.table_tbody = self.users_list_table.getElementsByTagName('tbody')[0];
+
+                self.show_users_table();
+
+            },
+            show_users_table: function () {
+                var self = this;
+                this.get_users(function (data) {
+                    var d = data.users,
+                            html = '';
+                    for (var i = 0; i < d.length; i++) {
+                        html += '' +
+                                '<tr>' +
+                                '<td>'+d[i]['login']+'</td>' +
+                                '<td>'+(d[i]['first_name'] == null ? '' : d[i]['first_name'])+'</td>' +
+                                '<td>'+(d[i]['last_name'] == null ? '' : d[i]['last_name'])+'</td>' +
+                                '<td><div onclick="_ui._uids[' + self.guid + '].deleteUser(' + d[i]['id'] + ')" class="delete_light_button"></div></td>' +
+                                '</tr>';
+                    }
+
+
+                    self.table_tbody.innerHTML = html;
+                })
+            },
+            get_users: function (callback) {
+
+                var self = this;
+
+                ajax.post('/index/users/get', {}, function (t) {
+
+                    if (t.error == true) {
+                        showMessage(getLang(t.message), MESSAGE_ERROR);
+                        self.table_tbody.innerHTML = '<tr><td colspan="100" class="ac">' + getLang('users-not-found') + '</td></tr>';
+                        return false;
+                    }
+
+                    if (isFunction(callback)) callback(t);
+
+                });
+            },
+            deleteUser: function (id) {
+
+                var self = this,
+                        data = {
+                            id: id
+                        };
+
+                ConfirmBox(getLang('users-delete-key'), getLang('users-delete-key-confirm'), function () {
+
+                    ajax.post('/index/users/delete', data, function (t) {
+
+                        if (t.error == true) {
+                            showMessage(getLang(t.message), MESSAGE_ERROR);
+                            return false;
+                        }
+
+                        self.show_users_table();
+
+                    });
+                });
+            },
+            addUser: function(){
+
+                var self = this;
+
+                if (!this.add_user_box) this.add_user_box = new MessageBox({
+                    type: 'MessageBox',
+                    title: 'Добавление пользователя',
+                    width: 620,
+                    fullPageLink: '',
+                    closeButton: true,
+                    dark: true
+                });
+                var box = this.add_user_box,
+                        save = function(){
+
+                            var data = {
+                                'login': trim(ge('add_user_login').value),
+                                'password': trim(ge('add_user_password').value),
+                                'first_name': trim(ge('add_user_first_name').value),
+                                'last_name': trim(ge('add_user_last_name').value)
+                            };
+
+                            ajax.post('/index/users/add', data, function (t) {
+
+                                if (t.error == true) {
+                                    showMessage(getLang(t.message), MESSAGE_ERROR);
+                                    return false;
+                                }
+
+                                box.hide();
+                                showMessage(getLang("user-add-success"), MESSAGE_SUCCESS);
+                                self.show_users_table();
+                            });
+                        };
+
+                box.removeButtons();
+
+                box.addButton({
+                    label: 'Закрыть',
+                    style: 'button_no',
+                    onClick: function () {
+                        box.hide();
+                    }
+                });
+                box.addButton({
+                    label: 'Добавить',
+                    onClick: function () {
+                        save();
+                    }
+                });
+
+                var html = '<div class="big">';
+                html += '<div class="cf"><div class="label">Логин:</div><div class="labeled"><input type="text" id="add_user_login"  value="" /></div></div>';
+                html += '<div class="cf"><div class="label">Пароль:</div><div class="labeled"><input type="text" id="add_user_password"  value="" /></div></div>';
+                html += '<div class="cf"><div class="label">Имя:</div><div class="labeled"><input type="text" id="add_user_first_name"  value="" /></div></div>';
+                html += '<div class="cf"><div class="label">Фамилия:</div><div class="labeled"><input type="text" id="add_user_last_name"  value="" /></div></div>';
+                html += '</div>';
+
+                box.content(html);
+                box.show();
+                return false;
+            }
+        });
+
+
+        onDomReady(function () {
+
+            new Users('users');
+
+        });
+
+
+    </script>
+{% endblock %}

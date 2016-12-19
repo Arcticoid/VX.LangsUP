@@ -3,5 +3,17 @@
 
     <div class="ac" id="404">Errors happens</div>
 
+    <script type="text/javascript">
+
+        var html = '<div class="wrap cf">' +
+                '<a class="fl logo" href="/"></a>'+
+                '<a class="fl" href="/users">Пользователи</a>'+
+                '<a class="fr logout tooltip tooltip-sw faa-parent animated-hover" data-label="Выход есть всегда!" onclick="ConfirmBox(getLang("logout-confirm-title"), getLang("logout-confirm"), function () {document.location.href = "/logout";}); return false;" href="/logout"><b>X</b></a>' +
+                '</div>';
+
+        geByClass1('header').innerHTML = html;
+
+    </script>
+
 
 {% endblock %}

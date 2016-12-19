@@ -34,6 +34,14 @@
                 this.guid = _ui.reg(this);
                 var self = this;
 
+                var html = '<div class="wrap cf">' +
+                        '<a class="fl logo" href="/"></a>'+
+                        '<a class="fl" href="/users">Пользователи</a>'+
+                        '<a class="fr logout tooltip tooltip-sw faa-parent animated-hover" data-label="Выход есть всегда!" href="/logout"><b>X</b></a>' +
+//                        '<a class="fr logout tooltip tooltip-sw faa-parent animated-hover" data-label="Выход есть всегда!" onclick="ConfirmBox("Подтвердите выход", "Подтвердите выход", function () {document.location.href = "/logout";}); return false;" href="/logout"><b>X</b></a>' +
+                        '</div>';
+
+                geByClass1('header').innerHTML = html;
 
                 ee.addListener('create-db-page', this.installPage);
                 ee.addListener('langs-page', this.langsPage);
