@@ -146,7 +146,7 @@
                 self.langs_list_table = geByClass1('langs_list_table', this.self);
                 self.table_tbody = self.langs_list_table.getElementsByTagName('tbody')[0];
 
-                ajax.post('/index/bundles/get', {}, function (t) {
+                ajax.post('/index/bundle/get', {}, function (t) {
 
 
                     if (t.error == true) {

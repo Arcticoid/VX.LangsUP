@@ -63,7 +63,7 @@
                         '<td width="25%">' + getLang('Логин') + '</td>' +
                         '<td width="38%">' + getLang('Имя') + '</td>' +
                         '<td width="38%">' + getLang('Фамилия') + '</td>' +
-                        '<td width="32"></td>' +
+                        '<td width="32">' + getLang('Удалить') + '</td>' +
                         '</tr>' +
                         '</thead>' +
                         '<tbody>' +
@@ -93,7 +93,7 @@
                                 '<td>'+d[i]['login']+'</td>' +
                                 '<td>'+(d[i]['first_name'] == null ? '' : d[i]['first_name'])+'</td>' +
                                 '<td>'+(d[i]['last_name'] == null ? '' : d[i]['last_name'])+'</td>' +
-                                '<td><div onclick="_ui._uids[' + self.guid + '].deleteUser(' + d[i]['id'] + ')" class="delete_light_button"></div></td>' +
+                                '<td class="fr"><div onclick="_ui._uids[' + self.guid + '].deleteUser(' + d[i]['id'] + ')" class="delete_light_button"></div></td>' +
                                 '</tr>';
                     }
 
@@ -105,7 +105,7 @@
 
                 var self = this;
 
-                ajax.post('/index/users/get', {}, function (t) {
+                ajax.post('/users/get', {}, function (t) {
 
                     if (t.error == true) {
                         showMessage(getLang(t.message), MESSAGE_ERROR);
@@ -126,7 +126,7 @@
 
                 ConfirmBox(getLang('users-delete-key'), getLang('users-delete-key-confirm'), function () {
 
-                    ajax.post('/index/users/delete', data, function (t) {
+                    ajax.post('/users/delete', data, function (t) {
 
                         if (t.error == true) {
                             showMessage(getLang(t.message), MESSAGE_ERROR);
@@ -160,7 +160,7 @@
                                 'last_name': trim(ge('add_user_last_name').value)
                             };
 
-                            ajax.post('/index/users/add', data, function (t) {
+                            ajax.post('/users/add', data, function (t) {
 
                                 if (t.error == true) {
                                     showMessage(getLang(t.message), MESSAGE_ERROR);

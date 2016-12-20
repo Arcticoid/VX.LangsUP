@@ -40,8 +40,9 @@
             },
             installDB: function () {
                 var self = this;
-                ajax.post('/index/install/db', {}, function (t) {
-
+                lockButton(ge('install_button'));
+                ajax.post('/install/db', {}, function (t) {
+                    unlockButton(ge('install_button'));
                     if (t.error == true) {
                         getLang(t.message, MESSAGE_ERROR);
                         return false;
@@ -57,7 +58,7 @@
                         '<div class="content_wrap">' +
                         '<div class="content big ac" id="content">' +
                         '<span style="font-size: 18px">База данных еще не установлена</span><br /><br />' +
-                        '<button class="flat_button" onclick="_ui._uids[' + self.guid + '].installDB()">Установить новую базу данных</button>' +
+                        '<button id="install_button" class="flat_button" onclick="_ui._uids[' + self.guid + '].installDB()">Установить новую базу данных</button>' +
                         '</div>' +
                         '</div>' +
                         '</div>';
